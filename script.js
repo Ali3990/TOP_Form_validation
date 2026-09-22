@@ -107,3 +107,12 @@ pwd.addEventListener("blur", () => {
             `);
     };
 });
+
+
+// confirm password
+const confirm = document.getElementById("pwd-confirm");
+
+function validateConfirmPassword(confirmPwd) {
+    const samePassword = pwd.value.test(confirmPwd)
+}
+
