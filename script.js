@@ -19,14 +19,16 @@ function validateEmail(emailInput) {
     return emailRegex.test(emailInput);
 };
 
-email.addEventListener("input", () => {
+function runEmailValidation() {
     const isValid = validateEmail(email.value);
     if (isValid) {
         clearError(email);
     } else {
         showError(email, "Please enter a correct email format.");
     };
-});
+}
+
+email.addEventListener("blur", runEmailValidation);
 
 
 // Country code is required
@@ -35,16 +37,18 @@ function validateCountry(countryOption) {
     return countryOption !== "";
 };
 
-country.addEventListener("blur", ()=> {
-    const isValid = validateCountry(country.value);
+function runCountryValidation() {
+     const isValid = validateCountry(country.value);
     runPostalValidation(); // in case the user changes country after entering postal code.
     if (isValid) {
         clearError(country);
     } else {
         showError(country, "A country selection is required.");
     };
-});
+};
 
+country.addEventListener("blur", runCountryValidation);
+country.addEventListener("input", runCountryValidation);
 
 
 // Postal code
@@ -83,6 +87,7 @@ function runPostalValidation() {
 };
 
 postal.addEventListener("blur", runPostalValidation);
+postal.addEventListener("input", runPostalValidation);
 
 
 // Password
@@ -96,9 +101,9 @@ function validatePassword(pwdinput) {
     return hasUpper && hasDigit && hasSpecial && longEnough;
 };
 
-
-pwd.addEventListener("blur", () => {
+function runPwdValidation() {
     const isValid = validatePassword(pwd.value);
+    runConfirmPassword();
     if (isValid) {
         clearError(pwd);
     } else {
@@ -106,13 +111,53 @@ pwd.addEventListener("blur", () => {
             a number, and a special character (e.g., !, @, *).
             `);
     };
-});
+};
 
+
+pwd.addEventListener("blur", runPwdValidation);
+pwd.addEventListener("input", runPwdValidation);
 
 // confirm password
-const confirm = document.getElementById("pwd-confirm");
+const confirmPwd = document.getElementById("pwd-confirm");
 
-function validateConfirmPassword(confirmPwd) {
-    const samePassword = pwd.value.test(confirmPwd)
-}
+function validateConfirmPassword(confirmPwdInput) {
+    const samePassword = pwd.value === confirmPwdInput;
+    return samePassword;
+};
 
+function runConfirmPassword() {
+    const isValid = validateConfirmPassword(confirmPwd.value);
+    if (isValid) {
+        clearError(confirmPwd);
+    } else {
+        showError(confirmPwd, "Your passwords must match.");
+    };
+};
+
+confirmPwd.addEventListener("blur", runConfirmPassword);
+confirmPwd.addEventListener("input", runConfirmPassword);
+
+// submit button - checks all spans to see if empty. Empty = all form fields are correct.
+
+
+
+const form = document.querySelector("form");
+const formStatus = document.getElementById("form-status");
+
+form.addEventListener("submit", (event) => {
+    runEmailValidation();
+    runCountryValidation();
+    runPostalValidation();
+    runPwdValidation();
+    runConfirmPassword();
+
+    const errorSpans = document.querySelectorAll(".error"); // grabs all the spans with class="error"
+    const anySpanErrors = Array.from(errorSpans).some(span => span.textContent !== "");
+
+    if (anySpanErrors) {
+        event.preventDefault();
+        formStatus.textContent = "Please fix the errors above before submitting.";
+    } else {
+        formStatus.textContent = "*high five* You have submitted successfully!";
+    };
+});
